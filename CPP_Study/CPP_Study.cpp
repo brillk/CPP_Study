@@ -2,33 +2,53 @@
 
 using namespace std;
 
-//얕은 복사 vs 깊은 복사 --면접 때 잘나오는 질문
+//캐스팅 (타입 변환)
 
-class Knight {
-public:
-
-
-public:
-	int _hp = 100;	
+class Player {
+	//virtual ~Player() {}
 };
+
+class Knight : public Player {
+
+};
+
+class Archer : public Player {
+
+};
+
+/*
+1. static_cast
+2. dynamic_cast
+3. const_cast
+4. reinterpret_cast
+
+*/
 
 int main()
 {
-	Knight knight; // 기본 생성자
-	knight._hp = 200;
+	/*static_cast : 타입 원칙에 비춰 볼떄 상식적인 캐스팅만 해준다
+	1) int <-> float
+	2) Player* -> Knight* 다운 캐스팅 - 가장 대표적, 단! 안전성은 보장X
+	
+	*/
 
-	Knight knight2 = knight; //복사 생성자 
-	//Knight knight3(knight);
+	int hp = 100;
+	int maxhp = 1000;
+	float ratio = static_cast<float>(hp) / maxhp; // c++ 친화적 문법
 
-	Knight knight3; //기본 생성자
-	knight3 = knight; //복사 대입 연산자
+	//부모 <-> 자식
+	Player* p = new Archer();
+	Knight* k1 = static_cast<Knight*>(p);
 
 
-	//복사 생성자 + 복사 대입 연산자 
-	//둘다 안 만들어주면 컴파일러 '암시적으로 만들어준다'
+	/*
+	dynamic_cast : 상속관계에서의 안전한 형변환
+	RTTI (RUnTime Type Inforamtiom)
+	다형성을 활용하는 방식
+	
+	*/
 
-	//중간결론 - 컴파일러가 잘 만들어준다 -> 그럼 수고하세요 치면 되나?
-	//
+	Knight* k2 = dynamic_cast<Knight*>(p);
 
 	return 0;
 };
