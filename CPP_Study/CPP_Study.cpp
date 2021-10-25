@@ -34,10 +34,15 @@ public:
 };
 
 //함수 포인터 단점: 상태을 저장할수 없다
-Item* FindItem(Item items[], int itemCount, bool(*func)(const Item*)) {
+
+template<typename T> //어떤 함수가 중복되면 하나하나씩 매개변수로 넣는게 아니라 탬플릿으로 다 받아서 그 값을 계속 바꿔쓴다
+Item* FindItem(Item items[], int itemCount, T selector) {
+	
 	for (int i = 0; i < itemCount; i++) {
+
 		Item* item = &items[i];
 
+		if (selector(item))
 		return item;
 	}
 	return nullptr;
@@ -53,9 +58,18 @@ int main()
 	//ex) UI스킬을 누르면 스킬이 써지는 함수 호출
 
 	Item items[10];
+	items[3]._ownerId = 100;
+	items[8]._ownerId = 2;
 
 
+	FindByOwnerId functor1;
+	functor1._ownerId = 100;
 
+	FindByRarity functor2;
+	functor2._rarity = 1;
+
+	Item* item1 = FindItem(items, 10, functor1); //특정 조건을 마지막에 넣어서 동작하는 형태 STL을 공부할때도 많이 도움된다
+	Item* item2 = FindItem(items, 10, functor2);
 
 	return 0;
 };
