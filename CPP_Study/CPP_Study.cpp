@@ -2,16 +2,20 @@
 using namespace std;
 #include <vector>
 
+class MyIterator {
+
+};
+
+class MyVector {
+public:
+	typedef MyIterator iterator;
+
+};
+
 int main()
 {	
 	/*
-	STL
-	프로그래밍 할때 필요한 자료구조/알고리즘들을 
-	탬플릿으로 재공하는 라이브러리
-
 	컨테이너 Container : 데이터를 저장하는 객체(자료구조 Data structure)
-	
-	- 면접에선 vector원리를 물어본다
 	
 	vector<- 동적 배열
 	1) vector의 동작원리 (size/capacity) 
@@ -19,58 +23,65 @@ int main()
 	3)처음/끝 삽입/삭제
 	4) 임의 접근
 
-
 	*/
 
-	//배열
-	//const int MAX_SIZE = 10;
-	//int arr[MAX_SIZE] = { };
 
-	//for (int i = 0; i < MAX_SIZE; i++) //10개 말고 더 추가하고 싶다
-	//	arr[i] = i;		//크기를 유동적으로 왔다갔다 할수 없을까?
+	// 반복자(iterator) : 포인터와 유사한 개념, 컨테이너의 원소(데이터)를 가리키고, 다음 / 이전 원소로 이동가능
+	vector<int> v(10);
 
-	//for (int i = 0; i < MAX_SIZE; i++)
-	//	cout << arr[i] << endl;
+	for (vector<int>::size_type i = 0; i < v.size(); i++) 
+		v[i] = i;
+	
+	//vector<int>::iterator it; //나중에 나오는 리스트나 맵도 이런 iterator를 가지고 있다
+	//int* ptr;
 
-	//동적 배열
-	//매우 중요한 개념 -> 어떻게 배열을 '유동적으로' 변화시킨거지?
+	//it = v.begin();
+	//ptr = &v[0]; //처음 주소를 ptr에 저장
 
-	/*
-	1) (여유분을 두고) 메모리를 할당한다
-	2) 여유분까지 꽉 찼으면, 메모리를 증설한다
-	2-1) 의문 - 배열을 만들떄 크기가 정해졌는데, 어떻게 증설할까?
-	2-2) 해답 - 기존의 영역을 버리고 더 큰영역을 만들어 준다 - 100 -> 140처럼
+	//cout << (*it) << endl; // 결과 0
+	//cout << (*ptr) << endl; //결과 0
 
-	3-1) 의문: 여유분은 얼만큼 해야 적당할까?
+	//메모리를 까서 it 와 ptr의 값을 확인했다
+	//어떤 컨테이너에 들어가 있는지 알수 있다
 
-
-
-	4-1) 의문: 증설을 얼만큼 해야할까?
-
-
-
-	5-1) 의문: 기존의 데이터를 어떻게 처리할까?
-
-	]*/
-	vector<int> v;
+	//++ 이나 --를 사용해 데이터의 크기만큼 이동 -> int에서 int의 다음 배열로
+	//응용
+	//
+	vector<int>::iterator itBegin = v.begin();
+	vector<int>::iterator itEnd = v.end();
+	//메모리 까기
+	//itBegin은 제대로 된 값, itEnd는 이상한 값이 나온다
+	//유효하지 않는 범위를 가리키고 있다 fdfdfdfdfd
 
 
-	//size = 실제 사용 데이터 개수
-	//  1 2 3 4 5 6 7 8 
-	//capacity = 여유분을 포함한 용량 개수
-	//	1 2 3 4 6 9 13 19 28 42 63
-	// 몇배씩 늘린다.
-	//reserve  = capacity 크기를 정해준다
-	//resize = size 크기를 정해준다   
-	//clear = size의 맨 마지막 값을 초기화(0으로) 한다
+	//iterator는 vector뿐 아니라, 다른 컨테이너에도 공통적으로 있는 개념
+	//STL 한정으로 통일성이 생겨서 다른 자료구조로 넘어가면 배우기가 편하다
+	//다른 컨테이너는 v[i]와 같은 인덱스 접근이 안될수도 있다
+	for (vector<int>::iterator it = v.begin(); it != v.end(); ++it) { //++it 가  it++보다 쪼금 더 성능에 좋다
+		
+		cout << (*it) << endl;
 
-
-	for (int i = 0; i < 1000; i++) {
-		v.push_back(100);
-		cout << v.size() << " " << v.capacity() << endl;
 	}
 
-	vector<int>().swap(v); // <- 임시 벡터 (실행되서 나중에 사라짐) swap 
+	//비교
+	int* ptrBegin = &v[0]; //v.begin()._Ptr;
+	int* ptrEnd = ptrBegin + 10; // v.end()._Ptr;
 
+	for (int* ptr = ptrBegin; ptr != ptrEnd; ++ptr) {
+		cout << (*ptr) << endl; // 결과 0~9
+	}
+
+
+	//정방향 읽기 ->
+	//vector<int>::const_iterator cit1 = v.cbegin();//const int*
+	
+
+	//역방향 읽기 <-
+	for (vector<int>::reverse_iterator it = v.rbegin(); it != v.rend(); ++it) {
+
+		cout << (*it) << endl;
+	}
+
+	return 0;
 
 };
