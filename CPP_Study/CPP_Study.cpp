@@ -7,31 +7,47 @@
 #include <iostream>
 
 
-//using
+//unscoped enum 범위없는 전역
+enum PlayerType {
 
-typedef  __int64 id;
-using id2 = int;	//이름이 먼저?
+	PT_Knight,
+	PT_Archer,
+	PT_Mage,
 
+};
+  
+enum class ObjectType {
+	Player, 
+	Monster,
+	Projectile
+};
+enum class ObjectType2 { //오 편하다 PT_ 이런 거 안 붙여도 됨
+	Player,
+	Monster,
+	Projectile
+};
 
-//1) 직관성
-typedef void (*MyFunc)(); //typedef < using
-using MyFunc2 = void(*)(); //가독성
-
-//2) 템플릿
-
-template<typename T>
-using List = std::vector<T>;
-
-//결론 : using을 쓰자
 
 int main()
 {
-	id playerid = 0;
+	//enum class ()scoped enum
+	//1) 이름 공간관리 (scoped) 이득이다
+	//2) 암묵적인 변환 금지
 
-	List<int> li;
-	li.push_back(1);
-	li.push_back(2);
-	li.push_back(3);
+	double value = static_cast<double>(ObjectType::Player); //강제
+	
+	int choice;
+	cin >> choice;
+
+	if (choice == static_cast<int>(ObjectType::Monster)) {
+
+	}
+
+	unsigned int bitFlag;
+
+	bitFlag = (1 << static_cast<int>(ObjectType::Player));
 
 	return 0;
+
+	//결론 enum이든 enum class 든 용도에 따라 잘 쓰자
 };
