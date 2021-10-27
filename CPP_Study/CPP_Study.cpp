@@ -6,47 +6,37 @@
 	#include <set>
 	#include <iostream>
 
+
+
 	class Knight {
 	public:
-		int _hp;
+
 	};
-	
-	//auto
+
+	//중괄호 초기화 { }
 
 	int main()
 	{
-		//Modern C++11
-
-		//int a = 3;
-		//float b = 3.14f;
-		//double c = 1.23;
-		//Knight d = Knight();
-		//const char* e = "kim";
-
-		auto a = 3;
-		auto b = 3.14f;
-		auto c = 1.23;
-		auto d = Knight();
-		auto e = "kim";
+		//중괄호 초기화{}
+		int a = 0;
+		int b = { 0 };
 
 
-		//auto라는 일종의 조커카드
-		//type deduction - 형식 연역?
-		//->말이 되게 맞춰보셈 (추론)
-		//추론 규칙은 생각보다 복잡해질수있다
-		
+		Knight k1;
+		Knight k2 = k1; //복사 연산자
 
-		auto f = &d;
-		const auto test = b;
-		auto* test1 = e;
+		Knight k3{ k1 }; 
 
-		//주의 : 기본 auto는 const, & 를 무시
+		vector<int> v2{ 1,2,3,4 };
 
-		int& reference = a;
-		const int cst = a;
+		//장점 
+		//1) vector 등 컨테이너와 잘어울린다 초기화 문법의 일치화
 
-		auto test1 = reference; //int
-		auto test2 = cst; //int
+		//2) 축소 변환 방지
+		int x = 0;
+		double y{ x }; //오류
+
+		//vector 등 특이한 케이스만 {} 사용
 
 		return 0;
 	};
