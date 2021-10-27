@@ -6,101 +6,92 @@
 #include <set>
 #include <iostream>
 
-//오른값 참조와 std::move
+//전달 참조 (forwarding reference)
 
-class Pet {
-
-};
 
 class Knight {
 public:
-	//void PrintInfo() const //read-only 힌트
-	Knight() {
-		cout << "Knight()" << endl;
-	}
+	Knight() { cout << "기본 생성자" << endl; }
+	Knight(const Knight&) { cout << "복사 생성자" << endl; }
+	Knight(Knight&&) noexcept { cout << "이동 생성자" << endl; }
 
-	//복사 생성자
-	Knight(const Knight& knight) {
-		cout << "const Knight()" << endl;
-	}
-
-	//이동 생성자
-	Knight(Knight&& knight) {
-
-	}
-
-	~Knight() {
-		if (_pet)
-			delete _pet;
-	}
 	
-	//복사 대입 연산자
-	void operator=(const Knight& knight) //왼값 참조 
-	{
-		cout << "operator=(const Knight&)" << endl;
-	
-		//깊은 복사 
-		_hp = knight._hp;
-
-		if (knight._pet)
-			_pet = new Pet(*knight._pet);
-	}
-
-	//이동 대입 연산자
-	void operator=(Knight&& knight) noexcept {
-		cout << "operator=(Knight&&)" << endl;
-
-		//얕은 복사 
-		_hp = knight._hp;
-		_pet = knight._pet;
-
-		knight._pet = nullptr;
-	}
-
-public:
-	int _hp = 100;
-	Pet* _pet = nullptr;
 };
 
 
-void TestKnight_Copy(Knight knight) {	}
-void TestKnight_lvalue(Knight& knight) { 	} 
-void TestKnight_Constlvalue(const Knight& knight) { }  //수정이 불가능?
+void Test_RValueRef(Knight&& k) //오른 값 참조
+{
 
-void TestKnight_RvalueRef(Knight&& knight) { } //오른 값을 받는 참조값
-//신나게 사용후 원본은 사용 ㄴ
-//마지막 식은 이동대상?
+}
+
+
+void Test_Copy(Knight k) {
+
+}
+
+template<typename T>
+void Test_ForwardingRef( T&& param) //전달 참조
+{
+
+	//밑의 두기능을 합침
+	Test_Copy(std::forward<T>(param));// 숏컷
+
+
+	//왼값 참조라면 복사
+	//Test_Copy(param);
+
+	//오른값 참조라면 이동
+	//Test_Copy(move(param));
+}
 
 int main()
 {
-	//왼값 lvalue vs 오른값 rvalue
-	//lvalue : 단일식을 넘어서 계속 지속되는 개체
-	//rvalue : lvalue가 아닌 나머지 (임시 값, 열거형, 람다, i++ 등)
+	/*
+	보편 참조 universal reference 같은 말
+	전달 참조 forwarding reference C++ 17	
 
-	int a = 3;
+	&& &를 두번 쓰면 -> 오른값 참조
+
+
+	*/
+
 
 	Knight k1;
 
-	TestKnight_Copy(k1);
-	//TestKnight_lvalue(Knight());
+	Test_RValueRef(move(k1));
 
-	TestKnight_Constlvalue(Knight());
-	TestKnight_RvalueRef(Knight()); 
-	TestKnight_RvalueRef(static_cast<Knight&&>(k1)); 
+	//Test_ForwardingRef(move(k1));
+	//Test_ForwardingRef(k1); // ??? 경우에 따라서 오른값 참조 일수도 왼값 참조일수도 있다
 
-	Knight k2;
-	k2._pet = new Pet();
-	k2._hp = 1000;
+	auto&& k2 = k1;
+	auto&& k3 = move(k1); //이런 문법은 자주 등장하지 않고 template, auto와 같이 쓸때 병행한다고 한다
 
-
-	//원본은 날려도 된다 << 는 힌트를 주는 쪽에 가깝다
-	Knight k3;
-	//k3 = static_cast<Knight&&>(k2);
-
-	k3 = std::move(k2); //오른값 참조로 캐스팅
-	//std::move의 본래 이름 후보 중 하나가 rvalue_cast
+	//공통점: 형식 연역 type deduction이 일어날때 등장한다
 
 
+	//전달 참조를 구별하는 법
+	//------------------------
+
+	Knight& k4 = k1;//왼값 참조
+	Knight&& k5 = move(k1);//오른값 참조	<-애는 오른값이 아니다?
+
+	//오른값 : 왼값이 아니다 = 단일식에서 벗어나면 사용X
+	//오른값 참조 : 오른값만 참조할수있는 참조 타입 
+	//Test_RValueRef(move(k5));
+
+	//파라미터에 오른값 참조라고 추론이 됐어도
+	//(T&& param)
+	//그대로 그 값을 안쪽에서 다시 쓰면 
+	//Test_Copy(param)이라고 적었을때 
+	//이 시발 
+	//param 값이 왼값 참조라서 
+	//왼쪽값이 나온다고?? 
+	//그리고 move를 붙여줘야 오른값 참조라고 이해하고 이동 생성자가 호출된다
+	//move(param)
+
+	Test_ForwardingRef(k1); //k1을 오른 값을 바꿔치기 한후 애를 전달
+	Test_ForwardingRef(move(k1)); //move를 사용해 오른값으로 이동해준다
+		
 
 	return 0;
 };
