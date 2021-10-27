@@ -7,47 +7,45 @@
 #include <iostream>
 
 
-//unscoped enum 범위없는 전역
-enum PlayerType {
+class Knight {
+public:
 
-	PT_Knight,
-	PT_Archer,
-	PT_Mage,
+public:
+	//정의되지 않은 비공개(private) 함수	
+	void operator=(const Knight& k) = delete; //외부에선 복사가 안되지만, 내부에선 가능
+
+	//뚫어주는 예외
+	//friend class Admin;
+	//private vs friend 
+
+private:
+	int _hp = 100;
 
 };
-  
-enum class ObjectType {
-	Player, 
-	Monster,
-	Projectile
-};
-enum class ObjectType2 { //오 편하다 PT_ 이런 거 안 붙여도 됨
-	Player,
-	Monster,
-	Projectile
-};
 
+class Admin {
+public:
+	void Copy(const Knight& k) {
+		Knight k1;
+
+		//복사 연산	
+		k1 = k;
+	}
+};
 
 int main()
 {
-	//enum class ()scoped enum
-	//1) 이름 공간관리 (scoped) 이득이다
-	//2) 암묵적인 변환 금지
-
-	double value = static_cast<double>(ObjectType::Player); //강제
 	
-	int choice;
-	cin >> choice;
+	Knight k1;
+	Knight k2;
 
-	if (choice == static_cast<int>(ObjectType::Monster)) {
+	//복사 연산자
+	//k1 = k2;
 
-	}
 
-	unsigned int bitFlag;
-
-	bitFlag = (1 << static_cast<int>(ObjectType::Player));
-
+	Admin admin;
+	admin.Copy(k1);
 	return 0;
 
-	//결론 enum이든 enum class 든 용도에 따라 잘 쓰자
+	
 };
