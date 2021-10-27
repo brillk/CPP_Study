@@ -6,92 +6,119 @@
 #include <set>
 #include <iostream>
 
-//전달 참조 (forwarding reference)
+//람다
+//함수 객체를 빠르게 만드는 문법
 
+enum class ItemType {
+	None,
+	Armor,
+	Weapon,
+	Jewelry,
+	Consumable,
+};
 
-class Knight {
-public:
-	Knight() { cout << "기본 생성자" << endl; }
-	Knight(const Knight&) { cout << "복사 생성자" << endl; }
-	Knight(Knight&&) noexcept { cout << "이동 생성자" << endl; }
-
-	
+enum class Rarity {
+	Commom,
+	Rare,
+	Unique,
 };
 
 
-void Test_RValueRef(Knight&& k) //오른 값 참조
-{
+class Item {
+public:
+	Item(){}
+	Item(int itemId, Rarity rarity, ItemType type)
+		: _itemId(itemId), _rarity(rarity), _type(type) {
 
-}
+	}
 
-
-void Test_Copy(Knight k) {
-
-}
-
-template<typename T>
-void Test_ForwardingRef( T&& param) //전달 참조
-{
-
-	//밑의 두기능을 합침
-	Test_Copy(std::forward<T>(param));// 숏컷
-
-
-	//왼값 참조라면 복사
-	//Test_Copy(param);
-
-	//오른값 참조라면 이동
-	//Test_Copy(move(param));
-}
+public:
+	int _itemId = 0;
+	Rarity _rarity = Rarity::Commom;
+	ItemType _type = ItemType::None;
+};
 
 int main()
 {
-	/*
-	보편 참조 universal reference 같은 말
-	전달 참조 forwarding reference C++ 17	
+	vector<Item> v;
+	v.push_back(Item(1, Rarity::Commom, ItemType::Weapon));
+	v.push_back(Item(2, Rarity::Commom, ItemType::Armor));
+	v.push_back(Item(3, Rarity::Rare, ItemType::Jewelry));
+	v.push_back(Item(4, Rarity::Unique, ItemType::Weapon));
 
-	&& &를 두번 쓰면 -> 오른값 참조
+	//람다 자체로 C++11에 새로운 기능이 들어간것은 아니다
+	{
+		struct isUniqueItem {
 
+			bool operator()(Item& item) {
+				return item._rarity == Rarity::Unique;
+			}
+		};
 
-	*/
-
-
-	Knight k1;
-
-	Test_RValueRef(move(k1));
-
-	//Test_ForwardingRef(move(k1));
-	//Test_ForwardingRef(k1); // ??? 경우에 따라서 오른값 참조 일수도 왼값 참조일수도 있다
-
-	auto&& k2 = k1;
-	auto&& k3 = move(k1); //이런 문법은 자주 등장하지 않고 template, auto와 같이 쓸때 병행한다고 한다
-
-	//공통점: 형식 연역 type deduction이 일어날때 등장한다
+		//람다 표현식 lambda expression
+		auto isUniqueLambda = [](Item& item) {
+			return item._rarity == Rarity::Unique;
+		};
 
 
-	//전달 참조를 구별하는 법
-	//------------------------
-
-	Knight& k4 = k1;//왼값 참조
-	Knight&& k5 = move(k1);//오른값 참조	<-애는 오른값이 아니다?
-
-	//오른값 : 왼값이 아니다 = 단일식에서 벗어나면 사용X
-	//오른값 참조 : 오른값만 참조할수있는 참조 타입 
-	//Test_RValueRef(move(k5));
-
-	//파라미터에 오른값 참조라고 추론이 됐어도
-	//(T&& param)
-	//그대로 그 값을 안쪽에서 다시 쓰면 
-	//Test_Copy(param)이라고 적었을때 
-	//이 시발 
-	//param 값이 왼값 참조라서 
-	//왼쪽값이 나온다고?? 
-	//그리고 move를 붙여줘야 오른값 참조라고 이해하고 이동 생성자가 호출된다
-	//move(param)
-
-	Test_ForwardingRef(k1); //k1을 오른 값을 바꿔치기 한후 애를 전달
-	Test_ForwardingRef(move(k1)); //move를 사용해 오른값으로 이동해준다
+		auto findIt = find_if(v.begin(), v.end(), 
+			[](Item& item) {return item._rarity == Rarity::Unique; });
 		
+		if (findIt != v.end())
+			cout << "아이템ID " << findIt->_itemId << endl;
+	
+	}
+
+
+	{
+		struct FindItem {
+
+			FindItem(int itemId, Rarity rarity, ItemType type)
+				: _itemId(itemId), _rarity(rarity), _type(type){
+
+			}
+			
+			bool operator()(Item& item) {
+				return item._itemId == _itemId && item._rarity == _rarity && item._type == _type;
+			}
+
+			int _itemId; //참조가 다른 애를 가리키고 있다
+			Rarity _rarity;
+			ItemType _type;
+		
+		};
+
+		int itemId = 4;
+		Rarity rarity = Rarity::Unique;
+		ItemType type = ItemType::Weapon;
+
+		//클로저 closure = 람다에 의해 만들어진 실행시점 객체
+
+		/*auto isUniqueLambda = [](Item& item) {
+			return item._rarity == Rarity::Unique;
+		};*/ //람다 표현식 lambda expression
+
+
+
+		//[] <- 캡처 capture : 함수객체 내부에 변수를 저장하는 개념과 유사
+		//사진을 [캡쳐]하듯이... 일종의 스냅샷을 찍는다고 이해하자
+		//기본 캡쳐 모드: 값(복사) 방식(=) 참조 방식(&)
+		//변수마다 캡쳐모드를 지정해서 사용 가능 : 값 방식(name), 참조 방식(&name)
+
+		auto findByItem = [=, &type](Item& item) //따로 적용시킬 수 있다
+		{
+			return item._itemId == itemId && item._rarity == rarity && item._type == type;
+		};
+
+		itemId = 10; //참조값 바꾸기
+
+		auto findIt = find_if(v.begin(), v.end(), FindItem(4, Rarity::Unique, ItemType::Weapon));
+			
+
+		if (findIt != v.end())
+			cout << "아이템ID " << findIt->_itemId << endl;
+
+	}
 
 	return 0;
 };
